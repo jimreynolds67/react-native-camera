@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import {
   findNodeHandle,
   Platform,
@@ -16,13 +16,7 @@ import {
 
 import type { FaceFeature } from './FaceDetector';
 
-const Rationale = PropTypes.shape({
-  title: PropTypes.string.isRequired,
-  message: PropTypes.string.isRequired,
-  buttonPositive: PropTypes.string,
-  buttonNegative: PropTypes.string,
-  buttonNeutral: PropTypes.string,
-});
+
 
 const requestPermissions = async (
   captureAudio: boolean,
@@ -245,49 +239,7 @@ type Rect = {
   height: number,
 };
 
-type PropsType = typeof View.props & {
-  zoom?: number,
-  useNativeZoom?: boolean,
-  maxZoom?: number,
-  ratio?: string,
-  focusDepth?: number,
-  type?: number | string,
-  onCameraReady?: Function,
-  onAudioInterrupted?: Function,
-  onAudioConnected?: Function,
-  onStatusChange?: Function,
-  onBarCodeRead?: Function,
-  onPictureTaken?: Function,
-  onPictureSaved?: Function,
-  onRecordingStart?: Function,
-  onRecordingEnd?: Function,
-  onTap?: Function,
-  onDoubleTap?: Function,
-  onGoogleVisionBarcodesDetected?: ({ barcodes: Array<TrackedBarcodeFeature> }) => void,
-  onSubjectAreaChanged?: ({ nativeEvent: { prevPoint: {| x: number, y: number |} } }) => void,
-  faceDetectionMode?: number,
-  trackingEnabled?: boolean,
-  flashMode?: number | string,
-  exposure?: number,
-  barCodeTypes?: Array<string>,
-  googleVisionBarcodeType?: number,
-  googleVisionBarcodeMode?: number,
-  whiteBalance?: number | string | {temperature: number, tint: number, redGainOffset?: number, greenGainOffset?: number, blueGainOffset?: number },
-  faceDetectionLandmarks?: number,
-  autoFocus?: string | boolean | number,
-  autoFocusPointOfInterest?: { x: number, y: number },
-  faceDetectionClassifications?: number,
-  onFacesDetected?: ({ faces: Array<TrackedFaceFeature> }) => void,
-  onTextRecognized?: ({ textBlocks: Array<TrackedTextFeature> }) => void,
-  captureAudio?: boolean,
-  keepAudioSession?: boolean,
-  useCamera2Api?: boolean,
-  playSoundOnCapture?: boolean,
-  playSoundOnRecord?: boolean,
-  videoStabilizationMode?: number | string,
-  pictureSize?: string,
-  rectOfInterest: Rect,
-};
+
 
 type StateType = {
   isAuthorized: boolean,
@@ -393,64 +345,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
     videoStabilizationMode: CameraManager.VideoStabilization || {},
   };
 
-  static propTypes = {
-    ...ViewPropTypes,
-    zoom: PropTypes.number,
-    useNativeZoom: PropTypes.bool,
-    maxZoom: PropTypes.number,
-    ratio: PropTypes.string,
-    focusDepth: PropTypes.number,
-    onMountError: PropTypes.func,
-    onCameraReady: PropTypes.func,
-    onAudioInterrupted: PropTypes.func,
-    onAudioConnected: PropTypes.func,
-    onStatusChange: PropTypes.func,
-    onBarCodeRead: PropTypes.func,
-    onPictureTaken: PropTypes.func,
-    onPictureSaved: PropTypes.func,
-    onRecordingStart: PropTypes.func,
-    onRecordingEnd: PropTypes.func,
-    onTap: PropTypes.func,
-    onDoubleTap: PropTypes.func,
-    onGoogleVisionBarcodesDetected: PropTypes.func,
-    onFacesDetected: PropTypes.func,
-    onTextRecognized: PropTypes.func,
-    onSubjectAreaChanged: PropTypes.func,
-    trackingEnabled: PropTypes.bool,
-    faceDetectionMode: PropTypes.number,
-    faceDetectionLandmarks: PropTypes.number,
-    faceDetectionClassifications: PropTypes.number,
-    barCodeTypes: PropTypes.arrayOf(PropTypes.string),
-    googleVisionBarcodeType: PropTypes.number,
-    googleVisionBarcodeMode: PropTypes.number,
-    type: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    cameraId: PropTypes.string,
-    flashMode: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    exposure: PropTypes.number,
-    whiteBalance: PropTypes.oneOfType([PropTypes.string, PropTypes.number,
-      PropTypes.shape({ temperature: PropTypes.number, tint: PropTypes.number,
-        redGainOffset: PropTypes.number,
-        greenGainOffset: PropTypes.number,
-        blueGainOffset: PropTypes.number })]),
-    autoFocus: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]),
-    autoFocusPointOfInterest: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
-    permissionDialogTitle: PropTypes.string,
-    permissionDialogMessage: PropTypes.string,
-    androidCameraPermissionOptions: Rationale,
-    androidRecordAudioPermissionOptions: Rationale,
-    notAuthorizedView: PropTypes.element,
-    pendingAuthorizationView: PropTypes.element,
-    captureAudio: PropTypes.bool,
-    keepAudioSession: PropTypes.bool,
-    useCamera2Api: PropTypes.bool,
-    playSoundOnCapture: PropTypes.bool,
-    playSoundOnRecord: PropTypes.bool,
-    videoStabilizationMode: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    pictureSize: PropTypes.string,
-    mirrorVideo: PropTypes.bool,
-    rectOfInterest: PropTypes.any,
-    defaultVideoQuality: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  };
+ 
 
   static defaultProps: Object = {
     zoom: 0,

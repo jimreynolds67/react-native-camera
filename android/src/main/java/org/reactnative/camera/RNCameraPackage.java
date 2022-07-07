@@ -23,7 +23,8 @@ public class RNCameraPackage implements ReactPackage {
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
         return Arrays.<NativeModule>asList(
                 new RCTCameraModule(reactApplicationContext),
-                new CameraModule(reactApplicationContext)
+                new CameraModule(reactApplicationContext),
+                new FaceDetectorModule(reactApplicationContext)
         );
     }
 

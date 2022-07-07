@@ -1,29 +1,29 @@
 package org.reactnative.facedetector.tasks;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import org.reactnative.facedetector.RNFaceDetector;
+import org.reactnative.frame.RNFrame;
+import org.reactnative.frame.RNFrameFactory;
 import org.reactnative.facedetector.FaceDetectorUtils;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
-import com.google.mlkit.vision.face.FaceDetector;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class FileFaceDetectionAsyncTask extends AsyncTask<Void, Void, Void> {
+public class FileFaceDetectionAsyncTask extends AsyncTask<Void, Void, List<Face>> {
   private static final String ERROR_TAG = "E_FACE_DETECTION_FAILED";
 
   private static final String MODE_OPTION_KEY = "mode";
@@ -66,7 +66,7 @@ public class FileFaceDetectionAsyncTask extends AsyncTask<Void, Void, Void> {
 
     // We have to check if the requested image is in a directory safely accessible by our app.
     boolean fileIsInSafeDirectories =
-            mPath.startsWith(mContext.getCacheDir().getPath()) || mPath.startsWith(mContext.getFilesDir().getPath());
+          mPath.startsWith(mContext.getCacheDir().getPath()) || mPath.startsWith(mContext.getFilesDir().getPath());
 
     if (!fileIsInSafeDirectories) {
       mPromise.reject(ERROR_TAG, "The image has to be in the local app's directories.");
@@ -81,12 +81,15 @@ public class FileFaceDetectionAsyncTask extends AsyncTask<Void, Void, Void> {
   }
 
   @Override
-  protected Void doInBackground(Void... voids) {
+  protected List<Face> doInBackground(Void... voids) {
     if (isCancelled()) {
       return null;
     }
 
     mRNFaceDetector = detectorForOptions(mOptions, mContext);
+    Bitmap bitmap = BitmapFactory.decodeFile(mPath);
+    mWidth = bitmap.getWidth();
+    mHeight = bitmap.getHeight();
 
     try {
       ExifInterface exif = new ExifInterface(mPath);
@@ -95,38 +98,18 @@ public class FileFaceDetectionAsyncTask extends AsyncTask<Void, Void, Void> {
       Log.e(ERROR_TAG, "Reading orientation from file `" + mPath + "` failed.", e);
     }
 
-    try {
-      InputImage image = InputImage.fromFilePath(mContext, Uri.parse(mUri));
-      FaceDetector detector = mRNFaceDetector.getDetector();
-      detector.process(image)
-              .addOnSuccessListener(
-                      new OnSuccessListener<List<Face>>() {
-                        @Override
-                        public void onSuccess(List<Face> faces) {
-                          serializeEventData(faces);
-                        }
-                      })
-              .addOnFailureListener(
-                      new OnFailureListener() {
-                        @Override
-                        public void onFailure(Exception e) {
-                          Log.e(ERROR_TAG, "Text recognition task failed", e);
-                          mPromise.reject(ERROR_TAG, "Text recognition task failed", e);
-                        }
-                      });
-    } catch (IOException e) {
-      e.printStackTrace();
-      Log.e(ERROR_TAG, "Creating Firebase Image from uri" + mUri + "failed", e);
-      mPromise.reject(ERROR_TAG, "Creating Firebase Image from uri" + mUri + "failed", e);
-    }
-    return null;
+    RNFrame frame = RNFrameFactory.buildFrame(bitmap);
+    return mRNFaceDetector.detect(frame);
   }
 
-  private void serializeEventData(List<Face> faces) {
+  @Override
+  protected void onPostExecute(List<Face> faces) {
+    super.onPostExecute(faces);
     WritableMap result = Arguments.createMap();
     WritableArray facesArray = Arguments.createArray();
 
-    for(Face face : faces) {
+    for(int i = 0; i < faces.size(); i++) {
+      Face face = faces.get(i);
       WritableMap encodedFace = FaceDetectorUtils.serializeFace(face);
       encodedFace.putDouble("yawAngle", (-encodedFace.getDouble("yawAngle") + 360) % 360);
       encodedFace.putDouble("rollAngle", (-encodedFace.getDouble("rollAngle") + 360) % 360);

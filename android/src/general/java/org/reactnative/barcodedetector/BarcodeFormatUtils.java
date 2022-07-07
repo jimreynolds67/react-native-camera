@@ -1,8 +1,8 @@
 package org.reactnative.barcodedetector;
 
 import android.util.SparseArray;
+import com.google.mlkit.vision.barcode.Barcode;
 
-import com.google.mlkit.vision.barcode.common.Barcode;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,27 +67,5 @@ public class BarcodeFormatUtils {
     }
 
     return UNKNOWN_FORMAT_INT;
-  }
-
-  public static int getFirebaseRotation(int mRotation){
-    int result;
-    switch (mRotation) {
-      case 0:
-        result = 0;
-        break;
-      case 90:
-        result = 90;
-        break;
-      case 180:
-        result = 180;
-        break;
-      case -90:
-      case 270:
-        result = 270;
-        break;
-      default:
-        result = 0;
-    }
-    return result;
   }
 }

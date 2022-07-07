@@ -47,7 +47,7 @@ public class BarcodeDetectionErrorEvent extends Event<BarcodeDetectionErrorEvent
 
   private WritableMap serializeEventData() {
     WritableMap map = Arguments.createMap();
-    map.putBoolean("isOperational", mBarcodeDetector != null);
+    map.putBoolean("isOperational", mBarcodeDetector != null && mBarcodeDetector.isOperational());
     return map;
   }
 }

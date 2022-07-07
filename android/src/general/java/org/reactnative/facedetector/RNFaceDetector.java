@@ -1,13 +1,15 @@
 package org.reactnative.facedetector;
 
-
 import android.content.Context;
-import android.util.Log;
 
-import com.google.mlkit.vision.face.FaceDetector;
+import org.reactnative.camera.utils.ImageDimensions;
+import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetection;
+import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
+import org.reactnative.frame.RNFrame;
 
+import java.util.List;
 
 public class RNFaceDetector {
   public static int ALL_CLASSIFICATIONS = FaceDetectorOptions.CLASSIFICATION_MODE_ALL;
@@ -16,12 +18,10 @@ public class RNFaceDetector {
   public static int NO_LANDMARKS = FaceDetectorOptions.LANDMARK_MODE_NONE;
   public static int ACCURATE_MODE = FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE;
   public static int FAST_MODE = FaceDetectorOptions.PERFORMANCE_MODE_FAST;
-  // TODO contours detection is possible for MLKit-based face detector, implement this feature
-  public static int ALL_CONTOURS = FaceDetectorOptions.CONTOUR_MODE_ALL;
-  public static int NO_CONTOURS = FaceDetectorOptions.CONTOUR_MODE_NONE;
 
   private FaceDetector mFaceDetector = null;
-  private FaceDetectorOptions.Builder mBuilder;
+  private ImageDimensions mPreviousDimensions;
+  private FaceDetectorOptions.Builder mBuilder = null;
 
   private int mClassificationType = NO_CLASSIFICATIONS;
   private int mLandmarkType = NO_LANDMARKS;
@@ -29,24 +29,44 @@ public class RNFaceDetector {
   private int mMode = FAST_MODE;
 
   public RNFaceDetector(Context context) {
-    mBuilder = new FaceDetectorOptions.Builder()
-            .setPerformanceMode(mMode)
-            .setLandmarkMode(mLandmarkType)
-            .setClassificationMode(mClassificationType)
-            .setMinFaceSize(mMinFaceSize);
+    mBuilder = new FaceDetectorOptions.Builder();
+    mBuilder.setMinFaceSize(mMinFaceSize);
+    mBuilder.setPerformanceMode(mMode);
+    mBuilder.setLandmarkMode(mLandmarkType);
+    mBuilder.setClassificationMode(mClassificationType);
   }
+
+  // Public API
 
   public boolean isOperational() {
-    // Legacy api from GMV
-    return true;
-  }
-
-  public FaceDetector getDetector() {
-
     if (mFaceDetector == null) {
       createFaceDetector();
     }
-    return mFaceDetector;
+
+    return true;
+  }
+
+  public List<Face> detect(RNFrame frame) {
+    // If the frame has different dimensions, create another face detector.
+    // Otherwise we will get nasty "inconsistent image dimensions" error from detector
+    // and no face will be detected.
+    if (!frame.getDimensions().equals(mPreviousDimensions)) {
+      releaseFaceDetector();
+    }
+
+    if (mFaceDetector == null) {
+      createFaceDetector();
+      mPreviousDimensions = frame.getDimensions();
+    }
+
+    return mFaceDetector.process(frame.getFrame()).getResult();
+  }
+
+  public void setTracking(boolean trackingEnabled) {
+    release();
+    if (trackingEnabled) {
+      mBuilder.enableTracking();
+    }
   }
 
   public void setClassificationType(int classificationType) {
@@ -73,26 +93,21 @@ public class RNFaceDetector {
     }
   }
 
-  public void setTracking(boolean tracking) {
-    release();
-    if (tracking) {
-      mBuilder.enableTracking();
-    }
+  public void release() {
+    releaseFaceDetector();
+    mPreviousDimensions = null;
   }
 
-  public void release() {
+  // Lifecycle methods
+
+  private void releaseFaceDetector() {
     if (mFaceDetector != null) {
-      try {
-        mFaceDetector.close();
-      } catch (Exception e) {
-        Log.e("RNCamera", "Attempt to close FaceDetector failed");
-      }
+      mFaceDetector.close();
       mFaceDetector = null;
     }
   }
 
   private void createFaceDetector() {
-    FaceDetectorOptions options = mBuilder.build();
-    mFaceDetector = FaceDetection.getClient(options);
+    mFaceDetector = FaceDetection.getClient(mBuilder.build());
   }
 }

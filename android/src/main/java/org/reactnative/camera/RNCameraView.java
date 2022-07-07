@@ -109,7 +109,7 @@ public class RNCameraView extends CameraView implements LifecycleEventListener, 
       }
 
       @Override
-      public void onPictureTaken(CameraView cameraView, final byte[] data, int deviceOrientation) {
+      public void onPictureTaken(CameraView cameraView, final byte[] data, int deviceOrientation, int softwareRotation) {
         Promise promise = mPictureTakenPromises.poll();
         ReadableMap options = mPictureTakenOptions.remove(promise);
         if (options.hasKey("fastMode") && options.getBoolean("fastMode")) {
@@ -117,10 +117,10 @@ public class RNCameraView extends CameraView implements LifecycleEventListener, 
         }
         final File cacheDirectory = mPictureTakenDirectories.remove(promise);
         if(Build.VERSION.SDK_INT >= 11/*HONEYCOMB*/) {
-          new ResolveTakenPictureAsyncTask(data, promise, options, cacheDirectory, deviceOrientation, RNCameraView.this)
+          new ResolveTakenPictureAsyncTask(data, promise, options, cacheDirectory, deviceOrientation, softwareRotation, RNCameraView.this)
                   .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else {
-          new ResolveTakenPictureAsyncTask(data, promise, options, cacheDirectory, deviceOrientation, RNCameraView.this)
+          new ResolveTakenPictureAsyncTask(data, promise, options, cacheDirectory, deviceOrientation, softwareRotation, RNCameraView.this)
                   .execute();
         }
         RNCameraViewHelper.emitPictureTakenEvent(cameraView);
@@ -209,7 +209,7 @@ public class RNCameraView extends CameraView implements LifecycleEventListener, 
         if (willCallTextTask) {
           textRecognizerTaskLock = true;
           TextRecognizerAsyncTaskDelegate delegate = (TextRecognizerAsyncTaskDelegate) cameraView;
-          new TextRecognizerAsyncTask(delegate, data, width, height, correctRotation, getResources().getDisplayMetrics().density, getFacing(), getWidth(), getHeight(), mPaddingX, mPaddingY).execute();
+          new TextRecognizerAsyncTask(delegate, mThemedReactContext, data, width, height, correctRotation, getResources().getDisplayMetrics().density, getFacing(), getWidth(), getHeight(), mPaddingX, mPaddingY).execute();
         }
       }
     });
@@ -511,7 +511,7 @@ public class RNCameraView extends CameraView implements LifecycleEventListener, 
    * Initial setup of the barcode detector
    */
   private void setupBarcodeDetector() {
-    mGoogleBarcodeDetector = new RNBarcodeDetector();
+    mGoogleBarcodeDetector = new RNBarcodeDetector(mThemedReactContext);
     mGoogleBarcodeDetector.setBarcodeType(mGoogleVisionBarCodeType);
   }
 

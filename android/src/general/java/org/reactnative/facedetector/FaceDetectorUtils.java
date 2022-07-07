@@ -13,9 +13,9 @@ public class FaceDetectorUtils {
   // All the landmarks reported by Google Mobile Vision in constants' order.
   // https://developers.google.com/android/reference/com/google/android/gms/vision/face/Landmark
   private static final String[] landmarkNames = {
-          "bottomMouthPosition", "leftCheekPosition", "leftEarPosition", "leftEarTipPosition",
-          "leftEyePosition", "leftMouthPosition", "noseBasePosition", "rightCheekPosition",
-          "rightEarPosition", "rightEarTipPosition", "rightEyePosition", "rightMouthPosition"
+    "bottomMouthPosition", "leftCheekPosition", "leftEarPosition", "leftEarTipPosition",
+      "leftEyePosition", "leftMouthPosition", "noseBasePosition", "rightCheekPosition",
+      "rightEarPosition", "rightEarTipPosition", "rightEyePosition", "rightMouthPosition"
   };
 
   public static WritableMap serializeFace(Face face) {
